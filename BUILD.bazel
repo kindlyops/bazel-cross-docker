@@ -1,0 +1,20 @@
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+go_image(
+    name = "baseimage",
+    args = ["-port=8080"],
+    binary = "@com_github_containous_whoami//:whoami",
+)
+
+# use container_image so we can set docker run flags
+# you can see the default docker run flags here
+# https://github.com/bazelbuild/rules_docker/blob/0d0dcd871d503c056130fbc008edec271eff1091/container/image.bzl#L355
+container_image(
+    name = "image",
+    base = ":baseimage",
+    docker_run_flags = "-i --rm", # published ports are discarded in network=host mode
+    legacy_run_behavior = False,
+    ports = ["8080"],
+)
+
